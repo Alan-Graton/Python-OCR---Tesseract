@@ -20,7 +20,11 @@ def dilate(image):
 
 def erode(image):
     kernel = np.ones((5, 5), np.uint8)
-    return cv2.morphologyEx(image, cv2.MORPHO_OPEN, kernel)
+    return cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
+
+def opening(image):
+    kernel = np.ones((5, 5), np.uint8)
+    return cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
 
 
 def canny(image):
@@ -47,6 +51,10 @@ def match_template(image, template):
 image = cv2.imread('images/aurebesh.jpg')
 
 gray = get_grayscale(image)
-cv2.imshow("GrayScale", gray)
+thresh = thresholding(gray)
+open = opening(gray)
+Canny = canny(gray)
+
+cv2.imshow("GrayScale", Canny)
 
 cv2.waitKey()
