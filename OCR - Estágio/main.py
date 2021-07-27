@@ -1,9 +1,6 @@
 import cv2
 import numpy as np
 
-img = cv2.imread('images/aurebesh.jpg')
-
-
 def get_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -46,3 +43,10 @@ def deskew(image):
 
 def match_template(image, template):
     return cv2.match_template(image, template, cv2.TM_CCOEFF_NORMED)
+
+image = cv2.imread('images/aurebesh.jpg')
+
+gray = get_grayscale(image)
+cv2.imshow("GrayScale", gray)
+
+cv2.waitKey()
