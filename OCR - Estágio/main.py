@@ -1,60 +1,27 @@
+import re
 import cv2
-import numpy as np
+import pytesseract
+from pytesseract import Output
+from matplotlib import pyplot as plt
 
-def get_grayscale(image):
-    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract'
 
+IMG_DIR = 'images/'
+image = cv2.imread(IMG_DIR + 'invoice-sample.jpg')
+d = pytesseract.image_to_data(image, output_type=Output.DICT)
+print('DATA KEYS: \n', d.keys())
 
-def remove_noise(image):
-    return cv2.medianBlur(image, 5)
+n_boxes = len(d['text'])
+for i in range(n_boxes):
+    # condition to only pick boxes with a confidence > 60%
+    if int(float(d['conf'][i])) > 60:
+        (x, y, w, h) = (d['left'][i], d['top']
+                        [i], d['width'][i], d['height'][i])
+        image = cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 0)
 
-
-def thresholding(image):
-    return cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-
-
-def dilate(image):
-    kernel = np.ones((5, 5), np.uint8)
-    return cv2.dilate(image, kernel, iterations=1)
-
-
-def erode(image):
-    kernel = np.ones((5, 5), np.uint8)
-    return cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
-
-def opening(image):
-    kernel = np.ones((5, 5), np.uint8)
-    return cv2.morphologyEx(image, cv2.MORPH_OPEN, kernel)
-
-
-def canny(image):
-    return cv2.Canny(image, 100, 200)
-
-
-def deskew(image):
-    coords = np.column_stack(np.where(image > 0))
-    angle = cv2.minAreaRect(coords)[-1]
-    if angle < -45:
-        angle = -(90 + angle)
-    else:
-        angle = -angle
-    (h, w) = image.shape[:2]
-    center = (w // 2, h // 2)
-    M = cv2.getRotationMatrix2D(center, angle, 1.0)
-    rotated = cv2.warpAffine(
-        image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-    return rotated
-
-def match_template(image, template):
-    return cv2.match_template(image, template, cv2.TM_CCOEFF_NORMED)
-
-image = cv2.imread('images/aurebesh.jpg')
-
-gray = get_grayscale(image)
-thresh = thresholding(gray)
-open = opening(gray)
-Canny = canny(gray)
-
-cv2.imshow("GrayScale", Canny)
-
-cv2.waitKey()
+b, g, r = cv2.split(image)
+rgb_img = cv2.merge([r, g, b])
+plt.figure(figsize=(16, 12))
+plt.imshow(rgb_img)
+plt.title('SAMPLE INVOICE WITH WORD LEVEL BOXES')
+plt.show()
