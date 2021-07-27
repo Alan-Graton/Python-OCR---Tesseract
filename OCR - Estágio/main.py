@@ -1,26 +1,20 @@
 import re
 import cv2
 import pytesseract as tess
+import numpy as np
 from pytesseract import Output
 from matplotlib import pyplot as plt
+from PIL import Image
 
-tess.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract'
+tess.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
 IMG_DIR = 'images/'
 PDF_DIR = 'PDFs/'
 
-image = cv2.imread(IMG_DIR + 'digits-task.jpg')
-b,g,r = cv2.split(image)
-rgb_img = cv2.merge([r,g,b])
+im = Image.open('Mels.png')
 
-# Imprimindo o todo o Conteúdo Imagem
-custom_config = r'-l eng --oem 3 --psm 6'
-print(tess.image_to_string(image, config = custom_config))
+texto = tess.image_to_string(im, lang = 'eng')
+print(texto)
 
-# Imprimindo somente os Dígitos da Imagem
-custom_config = r'--oem 3 --psm 6 outputbase digits'
-print(tess.image_to_string(image, config = custom_config))
-
-plt.imshow(rgb_img)
-plt.title('Sample Table')
-plt.show()
+texto = re.sub('\n', '\t\n', texto)
+print(texto)
